@@ -19,6 +19,7 @@ Here is a complete walkthrough, step by step video on how the example below.
 4. Create a Resource Group(RG) - this will be used for image distribution (see code below).
 5. Create Azure Shared Image Gallery (SIG) and Image Definition – this will be created in the RG above (see code below).
 6. Create a storage account – is used transfer the repo artifacts from the DevOps task to the image (see code below).
+7. Setup user identity for AIB to have permission to SIG.
 
 ### Code to do steps 1 - Register and enable requirements
 ```bash
@@ -36,6 +37,7 @@ az provider show -n Microsoft.VirtualMachineImages | grep registrationState
 az provider show -n Microsoft.Storage | grep registrationState
 az provider show -n Microsoft.Compute | grep registrationState
 az provider show -n Microsoft.KeyVault | grep registrationState
+az provider show -n Microsoft.Network | grep registrationState
 ```
 
 If they do not saw registered, run the commented out code below.
@@ -44,10 +46,10 @@ If they do not saw registered, run the commented out code below.
 ## az provider register -n Microsoft.Storage
 ## az provider register -n Microsoft.Compute
 ## az provider register -n Microsoft.KeyVault
-
+## az provider register -n Microsoft.Network
 ```
 
-### Code to do steps 4 to 6
+### Code to do steps 4 to 7
 ```bash
 # Setup environment variables
 aibResourceGroup=aibDevOpsImg
@@ -86,17 +88,40 @@ az sig image-definition create \
    --sku 2019 \
    --os-type Windows
 
-# assign the image builder spn rights to inject the image into the chosen resource group
-az role assignment create \
-    --assignee cf32a0cc-373c-47c9-9156-0db11f6a6dfc \
-    --role Contributor \
-    --scope /subscriptions/$subscriptionID/resourceGroups/$aibResourceGroup
-
 # staging storage account
 stagingStorageAcc=aibstagstor$(date +'%s')
 
 # create storage account and blob in resource group
 az storage account create -n $stagingStorageAcc -g $aibResourceGroup -l $location --sku Standard_LRS
+
+# create user assigned identity for image builder to access the storage account where the script is located
+idenityName=aibBuiUserId$(date +'%s')
+az identity create -g $aibResourceGroup -n $idenityName
+
+# get identity id
+imgBuilderCliId=$(az identity show -g $aibResourceGroup -n $idenityName | grep "clientId" | cut -c16- | tr -d '",')
+
+# get the user identity URI, needed for the template
+imgBuilderId=/subscriptions/$subscriptionID/resourcegroups/$aibResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$idenityName
+
+# download preconfigured role definition example
+curl https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/solutions/12_Creating_AIB_Security_Roles/aibRoleImageCreation.json -o aibRoleImageCreation.json
+
+imageRoleDefName="Azure Image Builder Image Def"$(date +'%s')
+
+# update the definition
+sed -i -e "s/<subscriptionID>/$subscriptionID/g" aibRoleImageCreation.json
+sed -i -e "s/<rgName>/$aibResourceGroup/g" aibRoleImageCreation.json
+sed -i -e "s/Azure Image Builder Service Image Creation Role/$aibResourceGroup/g" aibRoleImageCreation.json
+
+# create role definitions
+az role definition create --role-definition ./aibRoleImageCreation.json
+
+# grant role definition to the user assigned identity
+az role assignment create \
+    --assignee $imgBuilderCliId \
+    --role $imageRoleDefName \
+    --scope /subscriptions/$subscriptionID/resourceGroups/$aibResourceGroup
 
 ```
 
@@ -121,6 +146,7 @@ Go to the Release Pipeline > Edit. On the User Agent, click the '+', and search 
 
 Add these settings:
 * Azure Subscription - This should be the subscription of the RG
+* Identity Resource Id - Get the output of this variable: `echo $imgBuilderId`
 * Resource group - This should be the RG you created earlier
 * Location - Location of Image Builder Service location you will use
 * Image type - For this example, we will use MarketPlace
@@ -134,7 +160,7 @@ Add these settings:
 ```bash
 echo /subscriptions/$subscriptionID/resourceGroups/$aibResourceGroup/providers/Microsoft.Compute/galleries/$sigName/images/$imageDefName 
 ```
-* Regions separated by comma - Add `westus2,eastus`, note, you will pay for replication and storage costs for images, so if you do not to use eastus, just remove it.
+* Regions separated by comma - Add `westus2`, note, you will pay for replication and storage costs for images, so if you do not to use eastus, just remove it.
 * Save all the changes
 
 ### Start the Image Build
