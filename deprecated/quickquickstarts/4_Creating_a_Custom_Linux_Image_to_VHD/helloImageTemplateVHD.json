@@ -1,0 +1,30 @@
+{
+    "type": "Microsoft.VirtualMachineImages",
+    "apiVersion": "2019-05-01-preview",
+    "location": "<region>",
+    "dependsOn": [],
+    "properties": {
+        "source": {
+            "type": "PlatformImage",
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "18.04-LTS",
+                "version": "latest"
+            
+        },
+        "customize": [
+            {
+                "type": "Shell",
+                "name": "HelloImageScript1",
+                "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"
+            }
+        ],
+        "distribute": 
+            [
+                {   "type":"VHD",
+                    "runOutputName": "<runOutputName>"
+    
+                }
+            ]
+        }
+    }

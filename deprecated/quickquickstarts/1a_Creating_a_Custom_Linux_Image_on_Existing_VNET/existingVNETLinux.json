@@ -1,0 +1,92 @@
+{
+    "type": "Microsoft.VirtualMachineImages/imageTemplates",
+    "apiVersion": "2020-02-14",
+    "location": "<region>",
+    "dependsOn": [],
+    "tags": {
+        "imagebuilderTemplate": "AzureVMImageBuilderVNET",
+        "userIdentity": "enabled"
+            },
+        "identity": {
+            "type": "UserAssigned",
+                    "userAssignedIdentities": {
+                    "<imgBuilderId>": {}
+                        
+                }
+                },
+    "properties": {
+
+        "buildTimeoutInMinutes" : 80,
+        
+        "vmProfile": 
+            {
+            "vmSize": "Standard_D1_v2",
+            "osDiskSizeGB": 30,
+            "vnetConfig": {
+                "subnetId": "/subscriptions/<subscriptionID>/resourceGroups/<vnetRgName>/providers/Microsoft.Network/virtualNetworks/<vnetName>/subnets/<subnetName>"
+                }
+            },
+
+        
+
+        "source": {
+            "type": "PlatformImage",
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "18.04-LTS",
+                "version": "latest"
+            
+        },
+        "customize": [
+            {
+                "type": "Shell",
+                "name": "RunScriptFromSource",
+                "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"
+            },
+
+            {
+                "type": "Shell",
+                "name": "CheckSumCompareShellScript",
+                "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript2.sh",
+                "sha256Checksum": "ade4c5214c3c675e92c66e2d067a870c5b81b9844b3de3cc72c49ff36425fc93"
+            },
+            
+            {
+                "type": "File",
+                "name": "downloadBuildArtifacts",
+                "sourceUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html",
+                "destination":"/tmp/index.html"
+            },
+
+            {
+                "type": "Shell",
+                "name": "setupBuildPath",
+                "inline": [
+                    "sudo mkdir /buildArtifacts",
+                    "sudo cp /tmp/index.html /buildArtifacts/index.html"
+                ]
+            },
+
+            {
+                "type": "Shell",
+                "name": "InstallUpgrades",
+                "inline": [
+                    "sudo apt install unattended-upgrades"
+                ]
+            }
+
+        ],
+        "distribute": 
+            [
+                {   "type":"ManagedImage",
+                    "imageId": "/subscriptions/<subscriptionID>/resourceGroups/<rgName>/providers/Microsoft.Compute/images/<imageName>",
+                    "location": "<region>",
+                    "runOutputName": "<runOutputName>",
+                    "artifactTags": {
+                        "source": "azVmImageBuilder",
+                        "baseosimg": "ubuntu1804"
+                    }
+                }
+            ]
+        }
+    }
