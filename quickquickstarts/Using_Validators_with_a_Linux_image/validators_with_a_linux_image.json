@@ -1,0 +1,57 @@
+{
+  "location": "westus2",
+  "identity": {
+    "type": "UserAssigned",
+    "userAssignedIdentities": {
+      "/subscriptions/<subscriptionID>/resourceGroups/<identityResourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<managedIdentity>": {}
+    }
+  },
+  "properties": {
+    "source": {
+      "type": "PlatformImage",
+      "publisher": "Canonical",
+      "offer": "UbuntuServer",
+      "sku": "16.04-LTS",
+      "version": "latest"
+    },
+    "customize": [
+      {
+          "type": "Shell",
+          "name": "AddBuildArtifacts3",
+          "inline": [
+              "sudo mkdir /buildArtifacts3",
+              "sudo touch /buildArtifacts3/imageBuilder.md"
+          ]
+          }
+
+  ],
+    "validate": {
+      "continueDistributeOnFailure": false,
+      "inVMValidations": [
+        {
+          "type": "Shell",
+          "name": "test shell validator inline",
+          "inline": [
+            "echo HelloValidate",
+            "echo ByeValidate"
+          ]
+        },
+        {
+          "type": "Shell",
+          "name": "<scriptName>",
+          "scriptUri": "<scriptUri>"
+        }
+      ]
+    },
+    "distribute": [
+      {
+        "type": "SharedImage",
+        "galleryImageId": "/subscriptions/<subscriptionID>/resourceGroups/<resourceGroupName>/providers/Microsoft.Compute/galleries/<sharedImageGalName>/images/<imageDefName>",
+        "runOutputName": "<runOutputName>",
+        "replicationRegions": [
+          "westus2"
+        ]
+      }
+    ]
+  }
+}
