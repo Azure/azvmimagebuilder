@@ -1,0 +1,80 @@
+{
+  "location": "westus2",
+  "identity": {
+    "type": "UserAssigned",
+    "userAssignedIdentities": {
+      "/subscriptions/<subscriptionID>/resourceGroups/<resourceGroupName>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<managedIdentity>": {}
+    }
+  },
+  "properties": {
+    "source": {
+      "type": "PlatformImage",
+      "publisher": "MicrosoftWindowsDesktop",
+      "offer": "Windows-10",
+      "sku": "20h2-pro",
+      "version": "latest"
+    },
+    "customize": [
+      {
+        "type": "WindowsRestart",
+        "restartCommand": "shutdown /f /r /t 0 /c \"packer restart\"",
+        "restartCheckCommand": "",
+        "restartTimeout": "20m",
+        "name": "Restart Max"
+      },
+      {
+        "type": "WindowsUpdate",
+        "searchCriteria": "IsInstalled=0",
+        "filters": [
+            "exclude:$_.Title -like '*Preview*'",
+            "include:$true"
+                    ],
+        "updateLimit": 20
+      },
+      {
+        "type": "PowerShell",
+        "name": "PowerShell Cmds Customizer test",
+        "inline": [
+          "Write-Host HelloCustomize",
+          "New-Item -ItemType file c:\\example_1.txt",
+          "echo $?",
+          "Write-Host ByeCustomize"
+        ]
+      }
+    ],
+    "validate": {
+      "continueDistributeOnFailure": false,
+      "inVMValidations": [
+        {
+          "type": "PowerShell",
+          "name": "test PowerShell validator inline",
+          "inline": [
+            "Write-Host HelloValidate",
+            "New-Item -ItemType file c:\\valdnfile_1.txt",
+            "echo $?",
+            "Write-Host ByeValidate"
+          ]
+        },
+        {
+          "type": "PowerShell",
+          "name": "<scriptName>",
+          "scriptUri": "<scriptUri>",
+          "validExitCodes": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    "distribute": [
+      {
+        "type": "SharedImage",
+        "galleryImageId": "/subscriptions/<subscriptionID>/resourceGroups/<resourceGroupName>/providers/Microsoft.Compute/galleries/<sharedImageGalName>/images/<imageDefName>",
+        "runOutputName": "<runOutputName>",
+        "replicationRegions": [
+          "westus2"
+        ]
+      }
+    ]
+  }
+}
