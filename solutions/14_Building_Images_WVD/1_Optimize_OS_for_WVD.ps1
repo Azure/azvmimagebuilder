@@ -40,6 +40,6 @@
 
  # run script
  # .\optimize -WindowsVersion 2004 -Verbose
-  .\Windows_VDOT.ps1 -WindowsVersion 2004 -Verbose
+  .\Windows_VDOT.ps1 -WindowsVersion 2004 -Verbose -AcceptEULA
   write-host 'AIB Customization: Finished OS Optimizations script'
  
