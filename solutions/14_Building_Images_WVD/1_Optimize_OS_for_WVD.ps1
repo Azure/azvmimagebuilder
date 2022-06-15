@@ -15,15 +15,13 @@
  Set-Location -Path C:\\Optimize\\Virtual-Desktop-Optimization-Tool-main
  
  # instrumentation
- $osOptURL = 'https://raw.githubusercontent.com/The-Virtual-Desktop-Team/Virtual-Desktop-Optimization-Tool/main/Win10_VirtualDesktop_Optimize.ps1'
+ $osOptURL = 'https://raw.githubusercontent.com/The-Virtual-Desktop-Team/Virtual-Desktop-Optimization-Tool/main/Windows_VDOT.ps1'
  $osOptURLexe = 'optimize.ps1'
  Invoke-WebRequest -Uri $osOptURL -OutFile $osOptURLexe
  
- 
- 
- # Patch: overide the Win10_VirtualDesktop_Optimize.ps1 - setting 'Set-NetAdapterAdvancedProperty'(see readme.md)
+ # Patch: overide the Windows_VDOT.ps1 - setting 'Set-NetAdapterAdvancedProperty'(see readme.md)
  Write-Host 'Patch: Disabling Set-NetAdapterAdvancedProperty'
- $updatePath= "C:\optimize\Virtual-Desktop-Optimization-Tool-main\Win10_VirtualDesktop_Optimize.ps1"
+ $updatePath= "C:\optimize\Virtual-Desktop-Optimization-Tool-main\Windows_VDOT.ps1"
  ((Get-Content -path $updatePath -Raw) -replace 'Set-NetAdapterAdvancedProperty -DisplayName "Send Buffer Size" -DisplayValue 4MB','#Set-NetAdapterAdvancedProperty -DisplayName "Send Buffer Size" -DisplayValue 4MB') | Set-Content -Path $updatePath
  
  # Patch: overide the REG UNLOAD, needs GC before, otherwise will Access Deny unload(see readme.md)
@@ -39,14 +37,9 @@
  #add gc and sleep
  $insert | ForEach-Object { $file.insert($_,"                 Write-Host 'Patch closing handles and runnng GC before reg unload' `n              `$newKey.Handle.close()` `n              [gc]::collect() `n                Start-Sleep -Seconds 15 ") }
  Set-Content $updatePath $file 
-  
 
- 
  # run script
  # .\optimize -WindowsVersion 2004 -Verbose
-  .\Win10_VirtualDesktop_Optimize.ps1 -WindowsVersion 2004 -Verbose
+  .\Windows_VDOT.ps1 -WindowsVersion 2004 -Verbose
   write-host 'AIB Customization: Finished OS Optimizations script'
- 
- 
-  
  
