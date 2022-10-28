@@ -1,0 +1,84 @@
+{
+    "properties": {
+        "source": {
+            "exactVersion": "18.04.202210180",
+            "offer": "UbuntuServer",
+            "publisher": "Canonical",
+            "sku": "18.04-LTS",
+            "type": "PlatformImage",
+            "version": "latest"
+        },
+        "customize": [
+            {
+                "name": "RunScriptFromSource",
+                "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh",
+                "sha256Checksum": "2c6ff6902a4a52deee69e8db26d0036a53388651008aaf31795bb20dabd21fd8",
+                "type": "Shell"
+            },
+            {
+                "name": "CheckSumCompareShellScript",
+                "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript2.sh",
+                "sha256Checksum": "ade4c5214c3c675e92c66e2d067a870c5b81b9844b3de3cc72c49ff36425fc93",
+                "type": "Shell"
+            },
+            {
+                "destination": "/tmp/index.html",
+                "name": "downloadBuildArtifacts",
+                "sha256Checksum": "d9715d72889fb1a0463d06ce9e89d1d2bd33b2c5e5362a736db6f5a25e601a58",
+                "sourceUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html",
+                "type": "File"
+            },
+            {
+                "inline": [
+                    "sudo mkdir /buildArtifacts",
+                    "\nsudo cp /tmp/index.html /buildArtifacts/index.html"
+                ],
+                "name": "setupBuildPath",
+                "type": "Shell"
+            },
+            {
+                "inline": [
+                    "sudo apt install unattended-upgrades"
+                ],
+                "name": "InstallUpgrades",
+                "type": "Shell"
+            }
+        ],
+        "distribute": [
+            {
+                "artifactTags": {},
+                "excludeFromLatest": false,
+                "galleryImageId": "/subscriptions/<subscriptionID>/resourceGroups/<resourceGroup>/providers/Microsoft.Compute/galleries/<galleryName>/images/<imageDefName>/versions/<imageVersion>",
+                "replicationRegions": [
+                    "<region1>",
+                    "<region2>"
+                ],
+                "runOutputName": "<runOutputName>",
+                "type": "SharedImage"
+            }
+        ],
+        "provisioningState": "Succeeded",
+        "buildTimeoutInMinutes": 0,
+        "vmProfile": {
+            "vmSize": "Standard_DS1_v2",
+            "osDiskSizeGB": 32,
+            "userAssignedIdentities": [
+                "/subscriptions/<subscriptionID>/resourcegroups/<resourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<buildVMIdentityId>"
+            ]
+        },
+    },
+    "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+            "/subscriptions/<subscriptionID>/resourcegroups/<resourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<imageTemplateIdentityId>": {
+                "principalId": "<principalId>",
+                "clientId": "<clientId>"
+            }
+        }
+    },
+    "tags": {},
+    "location": "<region1>",
+    "id": "/subscriptions/<subscriptionID>/resourcegroups/<resourceGroup>/providers/Microsoft.VirtualMachineImages/imageTemplates/<imageTemplateName>",
+    "name": "<imageTemplateName>",
+    "type": "Microsoft.VirtualMachineImages/imageTemplates"
+}
