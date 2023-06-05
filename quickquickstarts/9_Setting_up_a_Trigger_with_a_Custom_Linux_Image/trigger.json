@@ -1,0 +1,6 @@
+{
+    "location": "<region1>",
+    "properties": {
+      "kind": "SourceImage"
+    }
+}
