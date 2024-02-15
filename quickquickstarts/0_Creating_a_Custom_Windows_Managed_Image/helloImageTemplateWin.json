@@ -1,10 +1,10 @@
 {
     "type": "Microsoft.VirtualMachineImages/imageTemplates",
-    "apiVersion": "2020-02-14",
+    "apiVersion": "2022-02-14",
     "location": "<region>",
     "dependsOn": [],
     "tags": {
-        "imagebuilderTemplate": "windows2019",
+        "imagebuilderTemplate": "windows2022",
         "userIdentity": "enabled"
             },
         "identity": {
@@ -20,7 +20,7 @@
 
         "vmProfile": 
                 {
-                "vmSize": "Standard_D2_v2",
+                "vmSize": "Standard_D2s_v3",
                 "osDiskSizeGB": 127
                 },
         
@@ -28,7 +28,7 @@
             "type": "PlatformImage",
                 "publisher": "MicrosoftWindowsServer",
                 "offer": "WindowsServer",
-                "sku": "2019-Datacenter",
+                "sku": "2022-datacenter-azure-edition",
                 "version": "latest"
             
         },
@@ -78,7 +78,7 @@
                     "runOutputName": "<runOutputName>",
                     "artifactTags": {
                         "source": "azVmImageBuilder",
-                        "baseosimg": "windows2019"
+                        "baseosimg": "windows2022"
                     }
                 }
             ]
