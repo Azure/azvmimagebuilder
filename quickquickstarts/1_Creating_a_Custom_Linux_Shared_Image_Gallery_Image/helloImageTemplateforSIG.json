@@ -1,6 +1,6 @@
 {
     "type": "Microsoft.VirtualMachineImages",
-    "apiVersion": "2020-02-14",
+    "apiVersion": "2022-02-14",
     "location": "<region1>",
     "dependsOn": [],
     "tags": {
@@ -21,15 +21,15 @@
 
         "vmProfile": 
             {
-            "vmSize": "Standard_D1_v2",
+            "vmSize": "Standard_D2s_v3",
             "osDiskSizeGB": 30
             },
         
         "source": {
             "type": "PlatformImage",
                 "publisher": "Canonical",
-                "offer": "UbuntuServer",
-                "sku": "18.04-LTS",
+                "offer": "0001-com-ubuntu-server-focal",
+                "sku": "20_04-lts-gen2",
                 "version": "latest"
             
         },
@@ -80,7 +80,7 @@
                 "runOutputName": "<runOutputName>",
                 "artifactTags": {
                     "source": "azureVmImageBuilder",
-                    "baseosimg": "ubuntu1804"
+                    "baseosimg": "ubuntu2004"
                 },
                 "replicationRegions": [
                   "<region1>",
